@@ -13,21 +13,20 @@ exports.bookResolver = void 0;
 // resovers/book.resolver.ts
 const book_model_1 = require("../model/book.model");
 exports.bookResolver = {
-    books: () => __awaiter(void 0, void 0, void 0, function* () { return yield book_model_1.Book.find(); }),
-    book: (_a) => __awaiter(void 0, [_a], void 0, function* ({ id }) { return yield book_model_1.Book.findById(id); }),
-    addBook: (_a) => __awaiter(void 0, [_a], void 0, function* ({ title, author }) {
-        const newBook = new book_model_1.Book({ title, author });
-        return yield newBook.save();
-    }),
-    deleteBook: (_a) => __awaiter(void 0, [_a], void 0, function* ({ id }) {
-        return yield book_model_1.Book.findByIdAndDelete(id);
-    }),
-    updateBook: (_a) => __awaiter(void 0, [_a], void 0, function* ({ id, title, author }) {
-        const updatedFields = {};
-        if (title !== undefined)
-            updatedFields.title = title;
-        if (author !== undefined)
-            updatedFields.author = author;
-        return yield book_model_1.Book.findByIdAndUpdate(id, updatedFields, { new: true });
-    })
+    Query: {
+        books: () => __awaiter(void 0, void 0, void 0, function* () { return yield book_model_1.Book.find(); }),
+        book: (_a) => __awaiter(void 0, [_a], void 0, function* ({ id }) { return yield book_model_1.Book.findById(id); }),
+    },
+    Mutation: {
+        addBook: (_a) => __awaiter(void 0, [_a], void 0, function* ({ title, author }) {
+            const book = new book_model_1.Book({ title, author });
+            return yield book.save();
+        }),
+        deleteBook: (_a) => __awaiter(void 0, [_a], void 0, function* ({ id }) {
+            return yield book_model_1.Book.findByIdAndDelete(id);
+        }),
+        updateBook: (_a) => __awaiter(void 0, [_a], void 0, function* ({ id, title, author }) {
+            return yield book_model_1.Book.findByIdAndUpdate(id, { title, author }, { new: true });
+        })
+    }
 };

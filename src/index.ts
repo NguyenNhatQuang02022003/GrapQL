@@ -2,21 +2,19 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import { graphqlHTTP } from 'express-graphql';
-import schema from './schema/schema';
-import { bookResolver } from './resolvers/book.resolver'; 
-
+import { schema } from './schema';
 const app = express();
 
 app.use(cors());
 
+// Kết nối MongoDB
 mongoose.connect('mongodb://localhost:27017/bookstore')
   .then(() => console.log('✅ Kết nối MongoDB thành công'))
   .catch(err => console.error('❌ Lỗi MongoDB:', err));
 
-// Sử dụng bookResolver làm rootValue
+// Sử dụng schema đã gộp
 app.use('/graphql', graphqlHTTP({
   schema,
-  rootValue: bookResolver,
   graphiql: true,
 }));
 

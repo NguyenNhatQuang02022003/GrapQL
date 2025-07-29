@@ -1,6 +1,7 @@
-import { buildSchema } from 'graphql';
-
-const schema = buildSchema(`
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.bookTypeDefs = void 0;
+exports.bookTypeDefs = `
   type Book {
     id: ID!
     title: String!
@@ -17,7 +18,4 @@ const schema = buildSchema(`
     deleteBook(id: ID!): Book
     updateBook(id: ID!, title: String, author: String): Book
   }
-`);
-
-
-export default schema;
+`;
