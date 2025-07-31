@@ -8,52 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userResolvers = void 0;
-const prisma_client_1 = __importDefault(require("../prisma-client"));
+const user_model_1 = require("../model/user.model");
 exports.userResolvers = {
     Query: {
-        users: () => __awaiter(void 0, void 0, void 0, function* () { return yield prisma_client_1.default.user.findMany(); }),
-        user: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id }) { return yield prisma_client_1.default.user.findUnique({ where: { id } }); }),
+        users: () => __awaiter(void 0, void 0, void 0, function* () { return yield (0, user_model_1.getAllUsers)(); }),
+        user: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id }) { return yield (0, user_model_1.getUserById)(id); }),
     },
     Mutation: {
-        createUser: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { input }) {
-            const allowedRoles = ['user', 'admin'];
-            const role = input.role || 'user';
-            if (!allowedRoles.includes(role)) {
-                throw new Error(`Invalid role. Allowed roles are: ${allowedRoles.join(', ')}`);
-            }
-            return yield prisma_client_1.default.user.create({
-                data: {
-                    name: input.name,
-                    dob: new Date(input.dob),
-                    email: input.email,
-                    role: role,
-                },
-            });
-        }),
-        updateUser: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id, input }) {
-            const allowedRoles = ['user', 'admin'];
-            if (input.role && !allowedRoles.includes(input.role)) {
-                throw new Error(`Invalid role. Allowed roles are: ${allowedRoles.join(', ')}`);
-            }
-            return yield prisma_client_1.default.user.update({
-                where: { id },
-                data: {
-                    name: input.name,
-                    dob: new Date(input.dob),
-                    email: input.email,
-                    role: input.role,
-                },
-            });
-        }),
-        deleteUser: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id }) {
-            return yield prisma_client_1.default.user.delete({
-                where: { id },
-            });
-        }),
+        createUser: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { input }) { return yield (0, user_model_1.createUser)(input); }),
+        updateUser: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id, input }) { return yield (0, user_model_1.updateUser)(id, input); }),
+        deleteUser: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id }) { return yield (0, user_model_1.deleteUser)(id); }),
     },
 };

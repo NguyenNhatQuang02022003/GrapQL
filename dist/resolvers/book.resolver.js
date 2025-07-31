@@ -8,33 +8,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.bookResolver = void 0;
-const prisma_client_1 = __importDefault(require("../prisma-client"));
+const book_model_1 = require("../model/book.model");
 exports.bookResolver = {
     Query: {
-        books: () => __awaiter(void 0, void 0, void 0, function* () { return yield prisma_client_1.default.book.findMany(); }),
-        book: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id }) { return yield prisma_client_1.default.book.findUnique({ where: { id } }); }),
+        books: () => __awaiter(void 0, void 0, void 0, function* () { return yield (0, book_model_1.getAllBooks)(); }),
+        book: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id }) { return yield (0, book_model_1.getBookById)(id); }),
     },
     Mutation: {
         addBook: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { title, author }) {
-            return yield prisma_client_1.default.book.create({
-                data: { title, author }
-            });
+            return yield (0, book_model_1.createBook)(title, author);
         }),
         deleteBook: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id }) {
-            return yield prisma_client_1.default.book.delete({
-                where: { id }
-            });
+            return yield (0, book_model_1.deleteBook)(id);
         }),
         updateBook: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id, title, author }) {
-            return yield prisma_client_1.default.book.update({
-                where: { id },
-                data: { title, author }
-            });
+            return yield (0, book_model_1.updateBook)(id, title, author);
         })
     }
 };
