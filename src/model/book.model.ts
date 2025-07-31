@@ -1,8 +1,34 @@
-import mongoose from 'mongoose';
+import prisma from '../prisma-client';
 
-const bookSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  author: { type: String, required: true }
-});
+export const getAllBooks = async () => {
+  return await prisma.book.findMany();
+};
 
-export const Book = mongoose.model('Book', bookSchema);
+export const getBookById = async (id: string) => {
+  return await prisma.book.findUnique({
+    where: { id }
+  });
+};
+
+export const createBook = async (title: string, author: string) => {
+  return await prisma.book.create({
+    data: { title, author }
+  });
+};
+
+export const deleteBook = async (id: string) => {
+  return await prisma.book.delete({
+    where: { id }
+  });
+};
+
+export const updateBook = async (
+  id: string,
+  title?: string,
+  author?: string
+) => {
+  return await prisma.book.update({
+    where: { id },
+    data: { title, author }
+  });
+};

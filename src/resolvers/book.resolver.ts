@@ -1,21 +1,19 @@
-// resovers/book.resolver.ts
-import { Book } from '../model/book.model';
+import {  getAllBooks,  getBookById,  createBook,  deleteBook,  updateBook} from '../model/book.model';
 
 export const bookResolver = {
   Query: {
-    books: async () => await Book.find(),
-    book: async ({ id }: { id: string }) => await Book.findById(id),
+    books: async () => await getAllBooks(),
+    book: async (_: any, { id }: { id: string }) => await getBookById(id),
   },
   Mutation: {
-    addBook: async ({ title, author }: { title: string; author: string }) => {
-      const book = new Book({ title, author });
-      return await book.save();
+    addBook: async (_: any, { title, author }: { title: string; author: string }) => {
+      return await createBook(title, author);
     },
-    deleteBook: async ({ id }: { id: string }) => {
-      return await Book.findByIdAndDelete(id);
+    deleteBook: async (_: any, { id }: { id: string }) => {
+      return await deleteBook(id);
     },
-    updateBook: async ({ id, title, author }: { id: string, title?: string, author?: string }) => {
-      return await Book.findByIdAndUpdate(id, { title, author }, { new: true });
+    updateBook: async (_: any, { id, title, author }: { id: string, title?: string, author?: string }) => {
+      return await updateBook(id, title, author);
     }
   }
-};
+}

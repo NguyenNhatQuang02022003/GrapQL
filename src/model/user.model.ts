@@ -1,38 +1,49 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import prisma from '../prisma-client';
 
-// Định nghĩa interface cho TypeScript
-export interface IUser extends Document {
-  name: string;
-  dob: Date;
-  email: string;
-  role: 'user' | 'admin'; // Chỉ cho phép 2 giá trị
-}
+const allowedRoles = ['user', 'admin'];
 
-// Tạo Schema
-const UserSchema: Schema = new Schema({
-  name: { 
-    type: String, 
-    required: [true, 'Tên là bắt buộc'] 
-  },
-  dob: { 
-    type: Date, 
-    required: [true, 'Ngày sinh là bắt buộc'] 
-  },
-  email: { 
-    type: String, 
-    required: [true, 'Email là bắt buộc'],
-    unique: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Email không hợp lệ']
-  },
-  role: { 
-    type: String, 
-    enum: ['user', 'admin'], // Chỉ cho phép 2 role
-    default: 'user', // Mặc định là user
-    required: true
+export const getAllUsers = async () => {
+  return await prisma.user.findMany();
+};
+
+export const getUserById = async (id: string) => {
+  return await prisma.user.findUnique({ where: { id } });
+};
+
+export const createUser = async (input: any) => {
+  const role = input.role || 'user';
+  if (!allowedRoles.includes(role)) {
+    throw new Error(`Invalid role. Allowed roles are: ${allowedRoles.join(', ')}`);
   }
-}, {
-  timestamps: true
-});
 
-// Tạo model từ Schema
-export const User = mongoose.model<IUser>('User', UserSchema);
+  return await prisma.user.create({
+    data: {
+      name: input.name,
+      dob: new Date(input.dob),
+      email: input.email,
+      role,
+    },
+  });
+};
+
+export const updateUser = async (id: string, input: any) => {
+  if (input.role && !allowedRoles.includes(input.role)) {
+    throw new Error(`Invalid role. Allowed roles are: ${allowedRoles.join(', ')}`);
+  }
+
+  return await prisma.user.update({
+    where: { id },
+    data: {
+      name: input.name,
+      dob: new Date(input.dob),
+      email: input.email,
+      role: input.role,
+    },
+  });
+};
+
+export const deleteUser = async (id: string) => {
+  return await prisma.user.delete({
+    where: { id },
+  });
+};
