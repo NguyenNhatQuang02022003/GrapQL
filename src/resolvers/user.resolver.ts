@@ -1,4 +1,4 @@
-import {  getAllUsers,  getUserById,  createUser,  updateUser,  deleteUser} from '../model/user.model';
+import { getAllUsers,  getUserById,  createUser,  updateUser,  deleteUser,  loginUser,  resetPassword, changePassword,} from '../model/user.model';
 
 export const userResolvers = {
   Query: {
@@ -10,5 +10,11 @@ export const userResolvers = {
     updateUser: async (_: any, { id, input }: { id: string; input: any }) =>
       await updateUser(id, input),
     deleteUser: async (_: any, { id }: { id: string }) => await deleteUser(id),
+    login: async (_: any, { email, password }: { email: string; password: string }) =>
+      await loginUser(email, password),
+    resetPassword: async (_: any, { email, newPassword }: { email: string; newPassword: string }) =>
+      await resetPassword(email, newPassword),
+    changePassword: async (  _: any,  {email, oldPassword, newPassword,}: { email: string; oldPassword: string; newPassword: string }) => 
+      await changePassword(email, oldPassword, newPassword),
   },
 };

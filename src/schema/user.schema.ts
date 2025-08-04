@@ -9,10 +9,16 @@ export const userTypeDefs = `
     updatedAt: String
   }
 
+  type AuthPayload {
+    token: String!
+    user: User!
+  }
+
   input UserInput {
     name: String!
     dob: String!
     email: String!
+    password: String!
     role: String
   }
 
@@ -25,5 +31,8 @@ export const userTypeDefs = `
     createUser(input: UserInput!): User
     updateUser(id: ID!, input: UserInput!): User
     deleteUser(id: ID!): User
+    login(email: String!, password: String!): AuthPayload!
+    resetPassword(email: String!, newPassword: String!): User
+    changePassword(email: String!, oldPassword: String!, newPassword: String!): User!
   }
 `;

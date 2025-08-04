@@ -20,5 +20,8 @@ exports.userResolvers = {
         createUser: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { input }) { return yield (0, user_model_1.createUser)(input); }),
         updateUser: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id, input }) { return yield (0, user_model_1.updateUser)(id, input); }),
         deleteUser: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { id }) { return yield (0, user_model_1.deleteUser)(id); }),
+        login: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { email, password }) { return yield (0, user_model_1.loginUser)(email, password); }),
+        resetPassword: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { email, newPassword }) { return yield (0, user_model_1.resetPassword)(email, newPassword); }),
+        changePassword: (_1, _a) => __awaiter(void 0, [_1, _a], void 0, function* (_, { email, oldPassword, newPassword, }) { return yield (0, user_model_1.changePassword)(email, oldPassword, newPassword); }),
     },
 };

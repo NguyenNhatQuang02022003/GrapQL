@@ -12,9 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getAllUsers = void 0;
+exports.changePassword = exports.resetPassword = exports.loginUser = exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getAllUsers = void 0;
 const prisma_client_1 = __importDefault(require("../prisma-client"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const allowedRoles = ['user', 'admin'];
+const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield prisma_client_1.default.user.findMany();
 });
@@ -28,11 +31,13 @@ const createUser = (input) => __awaiter(void 0, void 0, void 0, function* () {
     if (!allowedRoles.includes(role)) {
         throw new Error(`Invalid role. Allowed roles are: ${allowedRoles.join(', ')}`);
     }
+    const hashedPassword = yield bcrypt_1.default.hash(input.password, 10);
     return yield prisma_client_1.default.user.create({
         data: {
             name: input.name,
             dob: new Date(input.dob),
             email: input.email,
+            password: hashedPassword,
             role,
         },
     });
@@ -59,3 +64,48 @@ const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 exports.deleteUser = deleteUser;
+// 👇 Hàm đăng nhập người dùng
+const loginUser = (email, password) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_client_1.default.user.findUnique({ where: { email } });
+    if (!user)
+        throw new Error('User not found');
+    const isMatch = yield bcrypt_1.default.compare(password, user.password);
+    if (!isMatch)
+        throw new Error('Incorrect password');
+    const token = jsonwebtoken_1.default.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
+        expiresIn: '1d',
+    });
+    return {
+        token,
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+        },
+    };
+});
+exports.loginUser = loginUser;
+// 👇 Hàm đặt lại mật khẩu
+const resetPassword = (email, newPassword) => __awaiter(void 0, void 0, void 0, function* () {
+    const hashed = yield bcrypt_1.default.hash(newPassword, 10);
+    return yield prisma_client_1.default.user.update({
+        where: { email },
+        data: { password: hashed },
+    });
+});
+exports.resetPassword = resetPassword;
+const changePassword = (email, oldPassword, newPassword) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_client_1.default.user.findUnique({ where: { email } });
+    if (!user)
+        throw new Error('User not found');
+    const isMatch = yield bcrypt_1.default.compare(oldPassword, user.password);
+    if (!isMatch)
+        throw new Error('Old password is incorrect');
+    const hashedNewPassword = yield bcrypt_1.default.hash(newPassword, 10);
+    return yield prisma_client_1.default.user.update({
+        where: { email },
+        data: { password: hashedNewPassword },
+    });
+});
+exports.changePassword = changePassword;

@@ -18,18 +18,24 @@ const express_graphql_1 = require("express-graphql");
 const schema_1 = require("./schema");
 const dotenv_1 = __importDefault(require("dotenv"));
 const prisma_client_1 = __importDefault(require("./prisma-client"));
+const auth_1 = require("./utils/auth");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
-app.use('/graphql', (0, express_graphql_1.graphqlHTTP)({
-    schema: schema_1.schema,
-    graphiql: true,
+app.use('/graphql', (0, express_graphql_1.graphqlHTTP)((req) => {
+    var _a;
+    const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
+    const user = token ? (0, auth_1.getUserFromToken)(token) : null;
+    return {
+        schema: schema_1.schema,
+        graphiql: true,
+        context: { user },
+    };
 }));
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`🚀 Server GraphQL chạy tại http://localhost:${PORT}/graphql`);
 });
-// Handle shutdown
 process.on('SIGINT', () => __awaiter(void 0, void 0, void 0, function* () {
     yield prisma_client_1.default.$disconnect();
     process.exit();
