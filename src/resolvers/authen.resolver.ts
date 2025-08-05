@@ -1,4 +1,4 @@
-import { getAllUsers,  getUserById,  createUser,  updateUser,  deleteUser,  loginUser,  resetPassword, changePassword,} from '../model/user.model';
+import { getAllUsers,  getUserById,  createUser,  updateUser,  deleteUser,  loginUser,  resetPassword, changePassword,} from '../model/authen.model';
 
 export const userResolvers = {
   Query: {

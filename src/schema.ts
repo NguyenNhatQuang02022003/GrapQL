@@ -1,8 +1,8 @@
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { bookTypeDefs } from './schema/book.schema';
-import { userTypeDefs } from './schema/user.schema';
+import { userTypeDefs } from './schema/authen.schema';
 import { bookResolver } from './resolvers/book.resolver';
-import { userResolvers } from './resolvers/user.resolver';
+import { userResolvers } from './resolvers/authen.resolver';
 
 const typeDefs = [bookTypeDefs, userTypeDefs];
 
