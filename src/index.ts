@@ -5,11 +5,24 @@ import { schema } from './schema';
 import dotenv from 'dotenv';
 import prisma from './prisma-client';
 import { getUserFromToken } from './utils/auth';
+import session from 'express-session';
+import passport from 'passport';
+import './utils/auth.google';
+import { generateToken } from './utils/auth.google';
 
 dotenv.config();
 const app = express();
 
 app.use(cors());
+
+// 👉 Middleware cho session và passport
+app.use(session({
+  secret: 'your-session-secret',
+  resave: false,
+  saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/graphql', graphqlHTTP((req) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -20,6 +33,23 @@ app.use('/graphql', graphqlHTTP((req) => {
     context: { user },
   };
 }));
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/auth/failure' }),
+  (req: any, res) => {
+    const token = generateToken(req.user);
+    res.send({ message: 'Google login successful', token });
+  }
+);
+
+
+app.get('/auth/failure', (req, res) => {
+  res.send('Google login failed');
+});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
