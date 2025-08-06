@@ -1,6 +1,7 @@
 import prisma from '../prisma-client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { sendResetPasswordEmail } from '../utils/email.service';
 
 const allowedRoles = ['user', 'admin'];
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
@@ -102,4 +103,16 @@ export const changePassword = async (
     where: { email },
     data: { password: hashedNewPassword },
   });
+};
+
+export const sendResetEmail = async (email: string) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) throw new Error('User not found');
+
+  const token = jwt.sign({ email }, process.env.JWT_SECRET || 'default-secret', {
+    expiresIn: '1h',
+  });
+
+  await sendResetPasswordEmail(email, token);
+  return { message: 'Reset email sent' };
 };

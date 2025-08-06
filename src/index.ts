@@ -34,12 +34,9 @@ app.use('/graphql', graphqlHTTP((req) => {
   };
 }));
 
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+app.get('/auth/google',  passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/auth/failure' }),
+app.get('/auth/google/callback',  passport.authenticate('google', { failureRedirect: '/auth/failure' }),
   (req: any, res) => {
     const token = generateToken(req.user);
     res.send({ message: 'Google login successful', token });

@@ -17,7 +17,7 @@ model Book {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   title  String
   author String
-  @@unique([title, author]) // Thêm unique constraint nếu muốn skip duplicates
+  @@unique([title, author]) 
 }
 
 model User {

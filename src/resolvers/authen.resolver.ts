@@ -1,4 +1,4 @@
-import { getAllUsers,  getUserById,  createUser,  updateUser,  deleteUser,  loginUser,  resetPassword, changePassword,} from '../model/authen.model';
+import { getAllUsers,  getUserById,  createUser,  updateUser,  deleteUser,  loginUser,  resetPassword, changePassword,sendResetEmail,} from '../model/authen.model';
 
 export const userResolvers = {
   Query: {
@@ -16,5 +16,6 @@ export const userResolvers = {
       await resetPassword(email, newPassword),
     changePassword: async (  _: any,  {email, oldPassword, newPassword,}: { email: string; oldPassword: string; newPassword: string }) => 
       await changePassword(email, oldPassword, newPassword),
+    sendResetEmail: async (_: any, { email }: { email: string }) => await sendResetEmail(email),
   },
 };

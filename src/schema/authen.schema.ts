@@ -13,6 +13,9 @@ export const userTypeDefs = `
     token: String!
     user: User!
   }
+  type MessageResponse {
+    message: String!
+  }
 
   input UserInput {
     name: String!
@@ -34,5 +37,6 @@ export const userTypeDefs = `
     login(email: String!, password: String!): AuthPayload!
     resetPassword(email: String!, newPassword: String!): User
     changePassword(email: String!, oldPassword: String!, newPassword: String!): User!
+    sendResetEmail(email: String!): MessageResponse!
   }
 `;
