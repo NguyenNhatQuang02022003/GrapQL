@@ -1,4 +1,4 @@
-import prisma from '../prisma-client';
+import prisma from '../../config/prisma-client';
 
 export const getAllBooks = async () => {
   return await prisma.book.findMany();

@@ -1,7 +1,7 @@
-import prisma from '../prisma-client';
+import prisma from '../../config/prisma-client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { sendResetPasswordEmail } from '../utils/email.service';
+import { sendResetPasswordEmail } from '../auth/email.service';
 
 const allowedRoles = ['user', 'admin'];
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';

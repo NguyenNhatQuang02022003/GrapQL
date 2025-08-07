@@ -1,4 +1,4 @@
-import {  getAllBooks,  getBookById,  createBook,  deleteBook,  updateBook} from '../model/book.model';
+import {  getAllBooks,  getBookById,  createBook,  deleteBook,  updateBook} from '../types/book';
 
 export const bookResolver = {
   Query: {

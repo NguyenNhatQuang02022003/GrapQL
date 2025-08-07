@@ -1,21 +1,21 @@
 import express from 'express';
 import cors from 'cors';
 import { graphqlHTTP } from 'express-graphql';
-import { schema } from './schema';
+import { schema } from './model/schema';
 import dotenv from 'dotenv';
-import prisma from './prisma-client';
-import { getUserFromToken } from './utils/auth';
+import prisma from './config/prisma-client';
+import { getUserFromToken } from './gql/auth/auth';
 import session from 'express-session';
 import passport from 'passport';
-import './utils/auth.google';
-import { generateToken } from './utils/auth.google';
+import './gql/auth/auth.google';
+import { generateToken } from './gql/auth/auth.google';
 
 dotenv.config();
 const app = express();
 
 app.use(cors());
 
-// 👉 Middleware cho session và passport
+
 app.use(session({
   secret: 'your-session-secret',
   resave: false,
