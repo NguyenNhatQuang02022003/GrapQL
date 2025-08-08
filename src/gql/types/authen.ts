@@ -1,4 +1,4 @@
-import prisma from '../../config/prisma-client';
+import prisma from '../../schema/prisma-client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { sendResetPasswordEmail } from '../auth/email.service';
