@@ -11,5 +11,5 @@ export const graphqlRoute: RequestHandler = (req, res, next) => {
     schema,
     graphiql: true,
     context: { user },
-  })(req, res); 
-};
+  })(req, res);
+};  

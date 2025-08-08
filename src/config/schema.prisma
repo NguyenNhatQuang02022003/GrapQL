@@ -11,6 +11,7 @@ generator client {
 enum UserRole {
   user
   admin
+  superadmin
 }
 
 model Book {

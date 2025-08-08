@@ -2,20 +2,84 @@ import prisma from '../../schema/prisma-client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { sendResetPasswordEmail } from '../auth/email.service';
+import { UserRole } from '@prisma/client';
+import { requireSuperadmin } from '../../gql/auth/auth';
 
-const allowedRoles = ['user', 'admin'];
+const allowedRoles: UserRole[] = [UserRole.user, UserRole.admin, UserRole.superadmin];
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
+const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL || 'superadmin@example.com';
+const SUPERADMIN_PASSWORD = process.env.SUPERADMIN_PASSWORD || 'securepassword';
 
 export const getAllUsers = async () => {
-  return await prisma.user.findMany();
+  return await prisma.user.findMany({
+    where: {
+      NOT: { role: UserRole.superadmin }, 
+    },
+    orderBy: { createdAt: 'desc' },
+  });
 };
 
 export const getUserById = async (id: string) => {
   return await prisma.user.findUnique({ where: { id } });
 };
 
-export const createUser = async (input: any) => {
-  const role = input.role || 'user';
+export const getAdmins = async () => {
+  return await prisma.user.findMany({
+    where: { 
+      OR: [
+        { role: UserRole.admin },
+        { role: UserRole.superadmin }
+      ]
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+};
+
+export const createInitialAdmin = async () => {
+  try {
+    const existingAdmin = await prisma.user.findFirst({
+      where: { role: UserRole.superadmin }
+    });
+
+    if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash(SUPERADMIN_PASSWORD, 10);
+      await prisma.user.create({
+        data: {
+          name: 'Super Admin',
+          email: SUPERADMIN_EMAIL,
+          password: hashedPassword,
+          role: UserRole.superadmin,
+          dob: new Date('1990-01-01')
+        },
+      });
+      console.log('✅ Superadmin account created');
+    }
+  } catch (error) {
+    console.error('Failed to create superadmin:', error);
+  }
+};
+
+export const createUser = async (input: any, contextUser?: any) => {
+  let role: UserRole = input.role || UserRole.user;
+
+  if (role === UserRole.admin && contextUser?.role !== UserRole.superadmin) {
+    throw new Error('Only superadmin can create admin accounts');
+  }
+
+  if (role === UserRole.superadmin) {
+    if (input.email !== SUPERADMIN_EMAIL) {
+      throw new Error('Only the predefined email can be assigned as superadmin');
+    }
+
+    const existingSuperadmin = await prisma.user.findFirst({
+      where: { role: UserRole.superadmin }
+    });
+
+    if (existingSuperadmin) {
+      throw new Error('Superadmin already exists');
+    }
+  }
+
   if (!allowedRoles.includes(role)) {
     throw new Error(`Invalid role. Allowed roles are: ${allowedRoles.join(', ')}`);
   }
@@ -33,9 +97,48 @@ export const createUser = async (input: any) => {
   });
 };
 
-export const updateUser = async (id: string, input: any) => {
-  if (input.role && !allowedRoles.includes(input.role)) {
-    throw new Error(`Invalid role. Allowed roles are: ${allowedRoles.join(', ')}`);
+export const promoteToAdmin = async (adminId: string, userId: string) => {
+  const admin = await prisma.user.findUnique({ where: { id: adminId } });
+  requireSuperadmin(admin);
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error('User not found');
+  if (user.role === UserRole.admin) throw new Error('User is already an admin');
+  if (user.role === UserRole.superadmin) throw new Error('Cannot modify superadmin role');
+
+  return await prisma.user.update({
+    where: { id: userId },
+    data: { role: UserRole.admin }
+  });
+};
+
+export const demoteAdmin = async (adminId: string, userId: string) => {
+  const admin = await prisma.user.findUnique({ where: { id: adminId } });
+  requireSuperadmin(admin);
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error('User not found');
+  if (user.role !== UserRole.admin) throw new Error('User is not an admin');
+
+  return await prisma.user.update({
+    where: { id: userId },
+    data: { role: UserRole.user }
+  });
+};
+
+export const updateUser = async (id: string, input: any, contextUser?: any) => {
+  if (input.role) {
+    if (!allowedRoles.includes(input.role)) {
+      throw new Error(`Invalid role. Allowed roles are: ${allowedRoles.join(', ')}`);
+    }
+
+    if (input.role === UserRole.superadmin && input.email !== SUPERADMIN_EMAIL) {
+      throw new Error('Only the predefined email can be assigned superadmin role');
+    }
+
+    if (contextUser?.role !== UserRole.superadmin) {
+      throw new Error('Only superadmin can update user roles');
+    }
   }
 
   return await prisma.user.update({
@@ -49,12 +152,21 @@ export const updateUser = async (id: string, input: any) => {
   });
 };
 
-export const deleteUser = async (id: string) => {
-  return await prisma.user.delete({
-    where: { id },
-  });
+export const deleteUser = async (id: string, contextUser?: any) => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) throw new Error('User not found');
+
+  if (user.role === UserRole.superadmin) {
+    throw new Error('Cannot delete superadmin');
+  }
+
+  if (user.role === UserRole.admin && contextUser?.role !== UserRole.superadmin) {
+    throw new Error('Only superadmin can delete admin accounts');
+  }
+
+  return await prisma.user.delete({ where: { id } });
 };
-// 👇 Hàm đăng nhập người dùng
+
 export const loginUser = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw new Error('User not found');
@@ -77,7 +189,6 @@ export const loginUser = async (email: string, password: string) => {
   };
 };
 
-// 👇 Hàm đặt lại mật khẩu
 export const resetPassword = async (email: string, newPassword: string) => {
   const hashed = await bcrypt.hash(newPassword, 10);
   return await prisma.user.update({
@@ -109,7 +220,7 @@ export const sendResetEmail = async (email: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw new Error('User not found');
 
-  const token = jwt.sign({ email }, process.env.JWT_SECRET || 'default-secret', {
+  const token = jwt.sign({ email }, JWT_SECRET, {
     expiresIn: '1h',
   });
 

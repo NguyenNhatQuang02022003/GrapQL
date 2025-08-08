@@ -13,6 +13,7 @@ export const userTypeDefs = `
     token: String!
     user: User!
   }
+
   type MessageResponse {
     message: String!
   }
@@ -28,6 +29,7 @@ export const userTypeDefs = `
   extend type Query {
     users: [User]
     user(id: ID!): User
+    adminAccounts: [User!]!
   }
 
   extend type Mutation {
@@ -38,5 +40,7 @@ export const userTypeDefs = `
     resetPassword(email: String!, newPassword: String!): User
     changePassword(email: String!, oldPassword: String!, newPassword: String!): User!
     sendResetEmail(email: String!): MessageResponse!
+    promoteToAdmin(userId: ID!): User!
+    demoteAdmin(userId: ID!): User!    
   }
 `;
