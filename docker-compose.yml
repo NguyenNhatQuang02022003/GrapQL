@@ -1,4 +1,3 @@
-version: "3.8"
 
 services:
   backend:
@@ -10,19 +9,33 @@ services:
       - mongo
     env_file:
       - .env
-    volumes:
-      - .:/app
-      - /app/node_modules
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
     command: sh -c "npx prisma generate && npm run start"
 
-  mongo:
+  mongo1:
     image: mongo:6
-    container_name: mongodb
+    container_name: mongo1
     ports:
       - "27017:27017"
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     volumes:
-      - mongo_data:/data/db
+      - mongo1_data:/data/db
+
+  mongo2:
+    image: mongo:6
+    container_name: mongo2
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - mongo2_data:/data/db
+    networks:
+      - mongo
 
 volumes:
-  mongo_data:
+  mongo1_data:
+  mongo2_data:
+
+networks:
+  mongo:
+    driver: bridge
