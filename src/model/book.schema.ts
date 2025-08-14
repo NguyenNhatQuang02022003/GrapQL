@@ -3,6 +3,7 @@ export const bookTypeDefs = `
     id: ID!
     title: String!
     author: String!
+    userId: ID!
   }
 
   type Query {
@@ -11,8 +12,8 @@ export const bookTypeDefs = `
   }
 
   type Mutation {
-    addBook(title: String!, author: String!): Book
+    addBook(title: String!, author: String!, userId: ID!): Book
     deleteBook(id: ID!): Book
-    updateBook(id: ID!, title: String, author: String): Book
+    updateBook(id: ID!, title: String, author: String, userId: ID): Book
   }
 `;

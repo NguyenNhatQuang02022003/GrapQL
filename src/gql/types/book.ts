@@ -10,9 +10,9 @@ export const getBookById = async (id: string) => {
   });
 };
 
-export const createBook = async (title: string, author: string) => {
+export const createBook = async (title: string, author: string, userId: string) => {
   return await prisma.book.create({
-    data: { title, author }
+    data: { title, author, userId }
   });
 };
 
