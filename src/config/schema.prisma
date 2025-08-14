@@ -4,7 +4,7 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["mongodb"]
 }
 
@@ -18,7 +18,7 @@ model Book {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   title  String
   author String
-  @@unique([title, author]) 
+  @@unique([title, author])
 }
 
 model User {
@@ -26,7 +26,7 @@ model User {
   name      String
   dob       DateTime
   email     String   @unique
-  password  String   
+  password  String
   role      UserRole
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
