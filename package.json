@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "npx prisma generate --schema=src/config/schema.prisma && tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node-dev src/index.ts",
-    "prisma:generate": "prisma generate --schema=src/config/schema.prisma",
-    "prisma:studio": "prisma studio --schema=src/config/schema.prisma",
-    "test:prisma": "ts-node src/test-prisma.ts",
-    "seed": "ts-node src/config/seed.ts"
-  },
+  "build": "npx prisma generate --schema=src/config/schema.prisma && tsc",
+  "start": "npm run prisma:generate && npm run build && node dist/index.js",
+  "dev": "ts-node-dev src/index.ts",
+  "prisma:generate": "prisma generate --schema=src/config/schema.prisma",
+  "prisma:studio": "prisma studio --schema=src/config/schema.prisma",
+  "test:prisma": "ts-node src/test-prisma.ts",
+  "seed": "ts-node src/config/seed.ts"
+},
   "prisma": {
     "schema": "src/config/schema.prisma"
   },
