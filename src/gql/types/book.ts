@@ -11,9 +11,26 @@ export const getBookById = async (id: string) => {
 };
 
 export const createBook = async (title: string, author: string, userId: string) => {
-  return await prisma.book.create({
-    data: { title, author, userId }
+  const existingBook = await prisma.book.findFirst({
+    where: {
+      title,
+      author
+    }
   });
+  if (existingBook) {
+    throw new Error(`Sách với title "${title}" và author "${author}" đã tồn tại.`);
+  }
+
+  try {
+    return await prisma.book.create({
+      data: { title, author, userId }
+    });
+  } catch (error: any) {
+    if (error.code === 11000) {
+      throw new Error(`Sách với title "${title}" và author "${author}" đã tồn tại.`);
+    }
+    throw error;
+  }
 };
 
 export const deleteBook = async (id: string) => {
