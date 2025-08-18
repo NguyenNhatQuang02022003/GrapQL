@@ -4,7 +4,7 @@ import session from 'express-session';
 import passport from 'passport';
 import dotenv from 'dotenv';
 import './gql/auth/auth.google';
-import prisma from './schema/prisma-client';
+import prisma from './prisma-client';
 import { graphqlRoute } from './routes/graphql.routes';
 import authRoutes from './routes/auth.routes';
 import { createInitialAdmin } from './gql/types/authen';

@@ -5,7 +5,7 @@ import {
   deleteBook,  
   updateBook 
 } from '../types/book';
-import prisma from '../../schema/prisma-client';
+import prisma from '../../prisma-client';
 
 export const bookResolver = {
   Query: {
