@@ -13,7 +13,7 @@ const SUPERADMIN_PASSWORD = process.env.SUPERADMIN_PASSWORD || 'securepassword';
 export const getAllUsers = async () => {
   return await prisma.user.findMany({
     where: {
-      NOT: { role: UserRole.superadmin }, 
+      NOT: { role: UserRole.superadmin },
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -25,7 +25,7 @@ export const getUserById = async (id: string) => {
 
 export const getAdmins = async () => {
   return await prisma.user.findMany({
-    where: { 
+    where: {
       OR: [
         { role: UserRole.admin },
         { role: UserRole.superadmin }
@@ -60,17 +60,24 @@ export const createInitialAdmin = async () => {
 };
 
 export const createUser = async (input: any, contextUser?: any) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { email: input.email },
+  });
+  if (existingUser) {
+    throw new Error('Email already exists');
+  }
+
   let role: UserRole = input.role || UserRole.user;
+
+  if (input.email === SUPERADMIN_EMAIL) {
+    role = UserRole.superadmin;
+  }
 
   if (role === UserRole.admin && contextUser?.role !== UserRole.superadmin) {
     throw new Error('Only superadmin can create admin accounts');
   }
 
   if (role === UserRole.superadmin) {
-    if (input.email !== SUPERADMIN_EMAIL) {
-      throw new Error('Only the predefined email can be assigned as superadmin');
-    }
-
     const existingSuperadmin = await prisma.user.findFirst({
       where: { role: UserRole.superadmin }
     });
@@ -127,16 +134,25 @@ export const demoteAdmin = async (adminId: string, userId: string) => {
 };
 
 export const updateUser = async (id: string, input: any, contextUser?: any) => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) throw new Error('User not found');
+
+  if (input.email && input.email !== user.email) {
+    const existingUser = await prisma.user.findUnique({ where: { email: input.email } });
+    if (existingUser) throw new Error('Email already exists');
+  }
+
   if (input.role) {
     if (!allowedRoles.includes(input.role)) {
       throw new Error(`Invalid role. Allowed roles are: ${allowedRoles.join(', ')}`);
     }
 
-    if (input.role === UserRole.superadmin && input.email !== SUPERADMIN_EMAIL) {
-      throw new Error('Only the predefined email can be assigned superadmin role');
+    // Nếu email trùng SUPERADMIN_EMAIL => gán superadmin
+    if (input.email === SUPERADMIN_EMAIL) {
+      input.role = UserRole.superadmin;
     }
 
-    if (contextUser?.role !== UserRole.superadmin) {
+    if (input.role === UserRole.superadmin && contextUser?.role !== UserRole.superadmin) {
       throw new Error('Only superadmin can update user roles');
     }
   }
