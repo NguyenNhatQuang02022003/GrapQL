@@ -10,6 +10,9 @@ COPY package*.json ./
 # Cài dependencies
 RUN npm install
 
+# Cài wait-port để chờ Mongo sẵn sàng
+RUN npm install wait-port --global
+
 # Copy toàn bộ code vào container
 COPY . .
 
@@ -22,5 +25,5 @@ RUN npm run build
 # Expose port GraphQL
 EXPOSE 4000
 
-# Lệnh chạy container
-CMD ["npm", "start"]
+# Lệnh chạy container: chờ Mongo sẵn sàng rồi chạy server
+CMD ["sh", "-c", "wait-port mongo1_rs:27017 && npm start"]
