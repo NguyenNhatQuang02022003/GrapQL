@@ -1,24 +1,30 @@
 import { Router } from 'express';
-import { graphqlHTTP } from 'express-graphql';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@as-integrations/express4';
+import bodyParser from 'body-parser';
+
 import { schema } from '../model/schema';
 import { getUserFromToken } from '../gql/auth/auth';
-import expressPlayground from 'graphql-playground-middleware-express';
 
-const router = Router();
+export async function createApolloGraphqlRoute() {
+  const router = Router();
 
-router.post(
-  '/',
-  (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    const user = token ? getUserFromToken(token) : null;
+  const server = new ApolloServer({
+    schema,
+  });
+  await server.start();
 
-    return graphqlHTTP({
-      schema,
-      context: { user },
-    })(req, res);
-  }
-);
+  router.use(
+    '/',
+    bodyParser.json(),
+    expressMiddleware(server, {
+      context: async ({ req }) => {
+        const token = req.headers.authorization?.split(' ')[1];
+        const user = token ? getUserFromToken(token) : null;
+        return { user };
+      },
+    })
+  );
 
-router.get('/', expressPlayground({ endpoint: '/graphql' }));
-
-export const graphqlRoute = router;
+  return router;
+}
